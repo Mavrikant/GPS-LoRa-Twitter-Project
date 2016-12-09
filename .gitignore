@@ -1,6 +1,9 @@
 # Password file
 *.pass
-*.pass.*
+
+#swap file 
+*.swp
+
 # PyCharm folder
 .idea/
 
