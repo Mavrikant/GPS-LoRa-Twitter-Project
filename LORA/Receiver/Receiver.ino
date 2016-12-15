@@ -9,6 +9,7 @@ by absolutelyautomation.com
 */
 // using SPI library:
 #include <SPI.h>
+
 // Digital pins definition
 #define MOSI 11
 #define MISO 12
@@ -146,19 +147,12 @@ void loop() {
  SPIreadBurst(0x00, rxbuf, payload_size); // read from fifo
 
 
- //"testing"
- if( (rxbuf[0] == 't') && (rxbuf[6] == 'g') ) // simple packet verification, please! use CRC flag for more robustness
- {
-digitalWrite(LED2, !digitalRead(LED2)); // Data OK toggle LED2
-init_rx();
- }
- else
- {
- digitalWrite(LED1, !digitalRead(LED1)); // Data WRONG toggle LED1
- init_rx(); // reinitialize rx when fail
- }
+ digitalWrite(LED1, !digitalRead(LED1)); // Data comes
+ init_rx(); // reinitialize rx
+
  
  Serial.write(rxbuf,30);
+ Serial.println();
  }
 
  }
