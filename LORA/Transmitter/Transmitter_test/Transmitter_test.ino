@@ -20,7 +20,7 @@ por automatizanos.com
 #define SCK    13
 #define SS     10
 
-#define NRESET 7
+#define NRESET A0
 #define TXEN   9
 #define RXEN   8
 #define LED1   A4
@@ -80,10 +80,10 @@ por automatizanos.com
 #define REG_LR_AGCTHRESH3                0x64
 
 // longitud del area de datos
-#define longitud_areadatos  7
+#define longitud_areadatos  30
 
 // paquete transmision
-unsigned char txbuf[longitud_areadatos]={'T','E','S','T','1','2','3'};
+unsigned char txbuf[longitud_areadatos]="0018.94984,02638.22174,1431179";
 // paquete recepcion
 unsigned char rxbuf[30];
 
@@ -153,7 +153,7 @@ void loop() {
     
   
   while(1){
-    modo_transmision();	   // transmitir paquete
+    modo_transmision();     // transmitir paquete
     delay(300);
     
   }
@@ -210,8 +210,8 @@ byte SPIescribeRegistro(byte direccion,byte valor) {
 
 void SPIescribeRafaga(unsigned char direccion, unsigned char *ptr, unsigned char longitud)
 { 
-	unsigned char i;
-	unsigned char resultado;
+  unsigned char i;
+  unsigned char resultado;
         
         digitalWrite(SS, LOW);          // Seleccionar el modulo LoRa
         
@@ -245,8 +245,8 @@ void SPIescribeRafaga(unsigned char direccion, unsigned char *ptr, unsigned char
 }
 void SPIleeRafaga(unsigned char direccion, unsigned char *ptr, unsigned char longitud)
 {
-	unsigned char i;
-	unsigned char resultado;
+  unsigned char i;
+  unsigned char resultado;
         
         digitalWrite(SS, LOW);          // Seleccionar el modulo LoRa
         
@@ -273,112 +273,112 @@ void SPIleeRafaga(unsigned char direccion, unsigned char *ptr, unsigned char lon
         // DEBUG DEBUG DEBUG        
                 
         digitalWrite(SS, HIGH);         // Deseleccionar el modulo LoRa
-	
+  
 }
 
 void reset_sx1276(void)
 {
     digitalWrite(TXEN, LOW);
-    digitalWrite(RXEN, LOW);	
+    digitalWrite(RXEN, LOW);  
 
-    digitalWrite(NRESET, LOW);	
+    digitalWrite(NRESET, LOW);  
     delay(10);
-    digitalWrite(NRESET, HIGH);	
+    digitalWrite(NRESET, HIGH); 
     delay(20);    
 }  
 
 void Configuracion_SX1276(void)
 {
-	// Para configurar el modulo se debe poner en modo sleep
+  // Para configurar el modulo se debe poner en modo sleep
 
-	SPIescribeRegistro(LR_RegOpMode,0x00);		// modo sleep, alta frecuencia
-	delay(10);
+  SPIescribeRegistro(LR_RegOpMode,0x00);    // modo sleep, alta frecuencia
+  delay(10);
 
-	SPIescribeRegistro(REG_LR_TCXO,0x09);		// Cristal externo
-        SPIescribeRegistro(LR_RegOpMode,0x80);		// modo LoRa, alta frecuencia
+  SPIescribeRegistro(REG_LR_TCXO,0x09);   // Cristal externo
+        SPIescribeRegistro(LR_RegOpMode,0x80);    // modo LoRa, alta frecuencia
 
         SPIescribeRegistro(LR_RegFrMsb,0xE4);
-	SPIescribeRegistro(LR_RegFrMid,0xC0);
-	SPIescribeRegistro(LR_RegFrLsb,0x00);		// frequency：915hz					 
+  SPIescribeRegistro(LR_RegFrMid,0xC0);
+  SPIescribeRegistro(LR_RegFrLsb,0x00);   // frequency：915hz           
 
 
-	SPIescribeRegistro(LR_RegPaConfig,0xFF);	// maxima potencia de salida PA_BOOST habilitado
+  SPIescribeRegistro(LR_RegPaConfig,0xFF);  // maxima potencia de salida PA_BOOST habilitado
 
 
-	SPIescribeRegistro(LR_RegOcp,0x0B);		// cerrar protecion de sobre corriente  ocp
-	SPIescribeRegistro(LR_RegLna,0x23);		// habilitar LNA
+  SPIescribeRegistro(LR_RegOcp,0x0B);   // cerrar protecion de sobre corriente  ocp
+  SPIescribeRegistro(LR_RegLna,0x23);   // habilitar LNA
 
-        SPIescribeRegistro(LR_RegModemConfig1,0x72);	// ancho de banda de señal：125kHz,codificacion de error = 4/5, modo cabecera explicita
+        SPIescribeRegistro(LR_RegModemConfig1,0x72);  // ancho de banda de señal：125kHz,codificacion de error = 4/5, modo cabecera explicita
         
-	SPIescribeRegistro(LR_RegModemConfig2,0xC7);	// factor de ensanchamiento：12
+  SPIescribeRegistro(LR_RegModemConfig2,0xC7);  // factor de ensanchamiento：12
 
-	SPIescribeRegistro(LR_RegModemConfig3,0x08);	// LNA? optimizado para velocidad de transmision lenta
-	  
-	SPIescribeRegistro(LR_RegSymbTimeoutLsb,0xFF);     // maximo tiempo de espera recepcion
+  SPIescribeRegistro(LR_RegModemConfig3,0x08);  // LNA? optimizado para velocidad de transmision lenta
+    
+  SPIescribeRegistro(LR_RegSymbTimeoutLsb,0xFF);     // maximo tiempo de espera recepcion
 
-	SPIescribeRegistro(LR_RegPreambleMsb,0x00);
-	SPIescribeRegistro(LR_RegPreambleLsb,16);          // preambulo 16 bytes  	
+  SPIescribeRegistro(LR_RegPreambleMsb,0x00);
+  SPIescribeRegistro(LR_RegPreambleLsb,16);          // preambulo 16 bytes    
 
-	SPIescribeRegistro(REG_LR_PADAC,0x87);             // potencia de transmision 20dBm
-	SPIescribeRegistro(LR_RegHopPeriod,0x00);          // sin saltos de frecuencia
+  SPIescribeRegistro(REG_LR_PADAC,0x87);             // potencia de transmision 20dBm
+  SPIescribeRegistro(LR_RegHopPeriod,0x00);          // sin saltos de frecuencia
 
-	SPIescribeRegistro(REG_LR_DIOMAPPING2,0x01);       // DIO5=ModeReady,DIO4=CadDetected
-	SPIescribeRegistro(LR_RegOpMode,0x01);             // modo standby, alta frecuencia
+  SPIescribeRegistro(REG_LR_DIOMAPPING2,0x01);       // DIO5=ModeReady,DIO4=CadDetected
+  SPIescribeRegistro(LR_RegOpMode,0x01);             // modo standby, alta frecuencia
 }
 
 void modo_transmision(void) 
 {
-	unsigned char direccion,temporal;
-	
-	digitalWrite(TXEN,HIGH);                                // abrir conmutador de antena transmision
+  unsigned char direccion,temporal;
+  
+  digitalWrite(TXEN,HIGH);                                // abrir conmutador de antena transmision
         digitalWrite(RXEN,LOW); 
   
 
-	SPIescribeRegistro(REG_LR_DIOMAPPING1,0x41); 		// DIO0=TxDone,DIO1=RxTimeout,DIO3=ValidHeader
-		
-	SPIescribeRegistro(LR_RegIrqFlags,0xff);		// limpiando interrupcion
-	SPIescribeRegistro(LR_RegIrqFlagsMask,0xf7);		// habilitando txdone
-	SPIescribeRegistro(LR_RegPayloadLength,longitud_areadatos);	// longitud de paquete de datos
+  SPIescribeRegistro(REG_LR_DIOMAPPING1,0x41);    // DIO0=TxDone,DIO1=RxTimeout,DIO3=ValidHeader
+    
+  SPIescribeRegistro(LR_RegIrqFlags,0xff);    // limpiando interrupcion
+  SPIescribeRegistro(LR_RegIrqFlagsMask,0xf7);    // habilitando txdone
+  SPIescribeRegistro(LR_RegPayloadLength,longitud_areadatos); // longitud de paquete de datos
 
-	direccion = SPIleeRegistro(LR_RegFifoTxBaseAddr);	// read TxBaseAddr        
-	SPIescribeRegistro(LR_RegFifoAddrPtr,direccion);	// TxBaseAddr->FifoAddrPtr          
-	
-	SPIescribeRafaga(0x00,txbuf,longitud_areadatos);	// escribir los datos en la fifo
-	SPIescribeRegistro(LR_RegOpMode,0x03);			// modo transmision, alta frequency
-	
+  direccion = SPIleeRegistro(LR_RegFifoTxBaseAddr); // read TxBaseAddr        
+  SPIescribeRegistro(LR_RegFifoAddrPtr,direccion);  // TxBaseAddr->FifoAddrPtr          
+  
+  SPIescribeRafaga(0x00,txbuf,longitud_areadatos);  // escribir los datos en la fifo
+  SPIescribeRegistro(LR_RegOpMode,0x03);      // modo transmision, alta frequency
+  
         
         digitalWrite(LED1, !digitalRead(LED1));
         
-	
-	temporal=SPIleeRegistro(LR_RegIrqFlags);		// leer la interrupcion 
-	while(!(temporal&0x08))					// esperar por bandera txdone
-	{
-		temporal=SPIleeRegistro(LR_RegIrqFlags);
-		               
-	}
-	
-	digitalWrite(TXEN,LOW);                                 // cerrar conmutador de antena transmision
+  
+  temporal=SPIleeRegistro(LR_RegIrqFlags);    // leer la interrupcion 
+  while(!(temporal&0x08))         // esperar por bandera txdone
+  {
+    temporal=SPIleeRegistro(LR_RegIrqFlags);
+                   
+  }
+  
+  digitalWrite(TXEN,LOW);                                 // cerrar conmutador de antena transmision
         digitalWrite(RXEN,LOW); 
   
-	SPIescribeRegistro(LR_RegIrqFlags,0xff);		// limpiar interrupcion
-	SPIescribeRegistro(LR_RegOpMode,0x01);  		// modo standby, alta frecuencia
-	
+  SPIescribeRegistro(LR_RegIrqFlags,0xff);    // limpiar interrupcion
+  SPIescribeRegistro(LR_RegOpMode,0x01);      // modo standby, alta frecuencia
+  
 }
 
 void inicializa_recepcion(void)
 {
-	unsigned char direccion; 
-	
+  unsigned char direccion; 
+  
         digitalWrite(TXEN,LOW);                                 // abrir el conmutador de recepcion de antena
         digitalWrite(RXEN,HIGH);
-			    
-	SPIescribeRegistro(REG_LR_DIOMAPPING1,0x01);		//DIO0=00, DIO1=00, DIO2=00, DIO3=01  DIO0=00--RXDONE
-	  
-	SPIescribeRegistro(LR_RegIrqFlagsMask,0x3f);		// habilitar rxdone y rxtimeout
-	SPIescribeRegistro(LR_RegIrqFlags,0xff);		// limpiar la interrupcion
+          
+  SPIescribeRegistro(REG_LR_DIOMAPPING1,0x01);    //DIO0=00, DIO1=00, DIO2=00, DIO3=01  DIO0=00--RXDONE
+    
+  SPIescribeRegistro(LR_RegIrqFlagsMask,0x3f);    // habilitar rxdone y rxtimeout
+  SPIescribeRegistro(LR_RegIrqFlags,0xff);    // limpiar la interrupcion
 
-	direccion = SPIleeRegistro(LR_RegFifoRxBaseAddr);	// read RxBaseAddr
-	SPIescribeRegistro(LR_RegFifoAddrPtr,direccion);	// RxBaseAddr->FifoAddrPtr
-	SPIescribeRegistro(LR_RegOpMode,0x05);			// modo recepcion continuo alta frecuencia
+  direccion = SPIleeRegistro(LR_RegFifoRxBaseAddr); // read RxBaseAddr
+  SPIescribeRegistro(LR_RegFifoAddrPtr,direccion);  // RxBaseAddr->FifoAddrPtr
+  SPIescribeRegistro(LR_RegOpMode,0x05);      // modo recepcion continuo alta frecuencia
 }
 
