@@ -1,4 +1,4 @@
-def sent_twit(twit):
+def send_twit(twit):
     import tweepy
     import secrets
     secrets = secrets.load()
