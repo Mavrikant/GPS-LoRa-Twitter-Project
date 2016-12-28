@@ -11,6 +11,12 @@ por automatizanos.com
 
 */
 
+
+String inputString = ""; // a string to hold incoming data
+String GPS_Result = "";
+boolean stringComplete = false; // whether the string is complete
+
+
 // usando la libreria SPI:
 #include <SPI.h>
 
@@ -83,7 +89,7 @@ por automatizanos.com
 #define longitud_areadatos  30
 
 // paquete transmision
-unsigned char txbuf[longitud_areadatos]="3818.9383,02638.1801,1431179";
+unsigned char txbuf[longitud_areadatos]="ERROR:SETUP";
 // paquete recepcion
 unsigned char rxbuf[30];
 
@@ -95,10 +101,11 @@ void setup() {
 
   // Iniciando el puerto serial para depuracion en caso de necesitarse
   Serial.begin(9600);
-
-
+  inputString.reserve(200);
+  GPS_Result.reserve(200);
+  GPS_Result = "ERROR:SETUP2";
   // Inicializando los pines del SPI como corresponde
-  
+  Serial.println("setup");
   pinMode(MOSI, OUTPUT);
   pinMode(MISO, INPUT);
   pinMode(SCK,OUTPUT);
@@ -148,27 +155,66 @@ void loop() {
   digitalWrite(LED1,LOW); 
   digitalWrite(LED2,LOW); 
   
-  reset_sx1276(); 
-  Configuracion_SX1276();  // inicializando el modulo RF
-  int aInt = 0;
-  char str[15];
+
+  stringComplete = false;
   
-  while(1){
+    //Serial.println("loop");
+    inputString = "";
+    //noInterrupts();
+      while (stringComplete == false) {
+        while (Serial.available() > 0 ) {
+          char inChar = (char) Serial.read();
+        //Serial.print(stringComplete);
+        if (inChar == '\n') {
+          inputString += inChar;
+          stringComplete = true;
+          break;
+         }
+         else{
+          inputString += inChar;
+         }
+         
+         }
+       
+        
+      }
+ //Serial.println(inputString);   
+//interrupts();
+  
+     
+    // Serial.println(inputString.substring(6,11));
+    //  
+    // $GPGLL,3818.9383,N,02638.1801,E,011856.092,A,A*5D
+    // 3818.94984,02638.22174,1431179
+    //Serial.print("inputString=");Serial.println(inputString);
+    //if  (stringComplete)
+      
+    if (inputString.substring(0, 6) == "$GPGLL") {
+      //Serial.print("inputString=");Serial.println(inputString);
+      if (inputString.substring(6, 11) == ",,,,,") {
+        GPS_Result = "ERROR:GPS NOT LOCKED";
+      } else {
+        GPS_Result = inputString.substring(7, 17) + inputString.substring(19, 30) + inputString.substring(32, 38);
+      }
+
+
+      //Serial.print("GPS_Result=");Serial.println(GPS_Result);
+
+
+    sprintf(txbuf, "                              ");
+    sprintf(txbuf, "%.30s", GPS_Result.c_str());
+    
+    stringComplete = false;
+    reset_sx1276(); 
+    Configuracion_SX1276();  // inicializando el modulo RF
 
     modo_transmision();     // transmitir paquete
-        if (txbuf[0]==9){
-        txbuf[0]=0;
     }
-    else{
-      txbuf[0]++;
-    }
-    
-    delay(8000);
-    
-  }
-    
-}
 
+    
+  
+
+} 
 
 
 byte SPIleeRegistro(byte direccion) {
@@ -239,14 +285,14 @@ void SPIescribeRafaga(unsigned char direccion, unsigned char *ptr, unsigned char
            resultado = SPDR;               // Desechar la segunda lectura  
            
            //DEBUG DEBUG DEBUG
-           Serial.print(*ptr, HEX);
+           //Serial.print(*ptr, HEX);
            //DEBUG DEBUG DEBUG
            
            ptr++;
         } 
         
         //DEBUG DEBUG DEBUG
-        Serial.print("\n");
+        //Serial.print("\n");
         // DEBUG DEBUG DEBUG        
                 
         digitalWrite(SS, HIGH);         // Deseleccionar el modulo LoRa
@@ -278,7 +324,7 @@ void SPIleeRafaga(unsigned char direccion, unsigned char *ptr, unsigned char lon
         } 
         
         //DEBUG DEBUG DEBUG
-        Serial.print("\n");
+        //Serial.print("\n");
         // DEBUG DEBUG DEBUG        
                 
         digitalWrite(SS, HIGH);         // Deseleccionar el modulo LoRa
@@ -390,4 +436,19 @@ void inicializa_recepcion(void)
   SPIescribeRegistro(LR_RegFifoAddrPtr,direccion);  // RxBaseAddr->FifoAddrPtr
   SPIescribeRegistro(LR_RegOpMode,0x05);      // modo recepcion continuo alta frecuencia
 }
+/*
+void serialEvent() {
+  while (Serial.available()) {
+    char inChar = (char) Serial.read();
+    //Serial.println(inChar);
+    if (inChar == '\n') {
+      stringComplete = true;
+    } else {
+      inputString += inChar;
+    }
+
+  }
+}
+
+*/
 
