@@ -1,0 +1,46 @@
+String inputString = ""; // a string to hold incoming data
+String GPS_Result = "";
+boolean stringComplete = false; // whether the string is complete
+
+void setup() {
+  // initialize serial:
+  Serial.begin(9600);
+  // reserve 200 bytes for the inputString:
+  inputString.reserve(200);
+  GPS_Result.reserve(200);
+}
+
+void loop() {
+  // print the string when a newline arrives:
+  if (stringComplete) {
+    // Serial.println(inputString);
+    // Serial.println(inputString.substring(6,11));
+    // $GPGLL,,,,,011855.092,V,N*79
+    // $GPGLL,3818.9383,N,02638.1801,E,011856.092,A,A*5D
+    // 3818.94984,02638.22174,1431179
+    if (inputString.substring(0, 6) == "$GPGLL") {
+      if (inputString.substring(6, 11) == ",,,,,") {
+        GPS_Result = "ERROR:GPS NOT LOCKED";
+      } else {
+        GPS_Result = inputString.substring(7, 17) + inputString.substring(19, 30) + inputString.substring(32, 38);
+      }
+    }
+
+    Serial.println(GPS_Result);
+    // clear the string:
+    inputString = "";
+    stringComplete = false;
+  }
+}
+
+void serialEvent() {
+  while (Serial.available()) {
+    char inChar = (char) Serial.read();
+    if (inChar == '\n') {
+      stringComplete = true;
+    } else {
+      inputString += inChar;
+    }
+
+  }
+}
