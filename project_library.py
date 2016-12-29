@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 def send_twit(twit):
     import tweepy
     import secrets
